@@ -17,20 +17,19 @@ class TitleAdmin(admin.ModelAdmin):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = (
         'text',
-        'score',
+        'rating',
         'created',
         'author',
-        'titles'
+        'title'
     )
-    search_fields = ('text', 'created', 'author', 'score')
-    list_filter = ('created', 'score')
+    search_fields = ('text', 'created', 'author', 'rating')
+    list_filter = ('created', 'rating')
     empty_value_display = '-пусто-'
 
 
 class CommentAdmin(admin.ModelAdmin):
     list_display = (
-        'pk',
-        'reviews',
+        'review',
         'author',
         'text',
         'created'

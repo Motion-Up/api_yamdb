@@ -1,7 +1,6 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 
-User = get_user_model()
+from users.models import CustomUser  # isort:skip
 
 
 class Category(models.Model):
@@ -75,10 +74,10 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews',
         max_length=200,
-        verbose_name='Текст отзыва'
+        verbose_name='Произведение'
     )
     author = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='reviews',
         max_length=200,
@@ -115,7 +114,7 @@ class Comment(models.Model):
         verbose_name='Текст отзыва'
     )
     author = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='comments',
         max_length=200,

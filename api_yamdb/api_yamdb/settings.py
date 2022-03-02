@@ -15,9 +15,10 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
+    'users.apps.UsersConfig',
     'reviews.apps.ReviewsConfig',
-    'api.apps.ApiConfig',
+    'api.apps.ApiConfig'
 ]
 
 MIDDLEWARE = [
@@ -91,8 +92,4 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
-}
+AUTH_USER_MODEL = 'users.CustomUser'
