@@ -44,7 +44,8 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(
         'Название произведения',
-        max_length=200
+        max_length=200,
+        db_index=True
     )
     category = models.ForeignKey(
         Category,
@@ -56,7 +57,7 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        related_name='names',
+        related_name='titles',
         verbose_name='Жанр'
     )
 

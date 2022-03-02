@@ -49,6 +49,9 @@ class GenreAdmin(admin.ModelAdmin):
         'name',
         'slug'
     )
+    search_fields = ('name',)
+    list_filter = ('name',)
+    empty_value_display = '-пусто-'
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -56,6 +59,9 @@ class CategoryAdmin(admin.ModelAdmin):
         'name',
         'slug'
     )
+    search_fields = ('name',)
+    list_filter = ('name',)
+    empty_value_display = '-пусто-'
 
 
 admin.site.register(Review, ReviewAdmin)
