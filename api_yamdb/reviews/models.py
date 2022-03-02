@@ -1,4 +1,7 @@
+from django.contrib.auth import get_user_model
 from django.db import models
+
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -8,7 +11,8 @@ class Category(models.Model):
     )
     slug = models.SlugField(
         'Уник. фрагмент url',
-        unique=True
+        unique=True,
+        db_index=True
     )
 
     class Meta:
@@ -26,7 +30,8 @@ class Genre(models.Model):
     )
     slug = models.SlugField(
         'Уник. фрагмент url',
-        unique=True
+        unique=True,
+        db_index=True
     )
 
     class Meta:
@@ -50,7 +55,7 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория'
     )
-    genre = models.ManyToManyField(
+    genre = models.ManytomanyField(
         Genre,
         related_name='titles',
         verbose_name='Жанр'
@@ -62,3 +67,68 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Review(models.Model):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        max_length=200,
+        verbose_name='Текст отзыва'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        max_length=200,
+        verbose_name='Автор'
+    )
+    text = models.TextField(verbose_name='Текст отзыва',
+                            help_text="Введите текст отзыва",
+                            )
+    created = models.DateTimeField(auto_now_add=True,
+                                   verbose_name='Дата публикации'
+                                   )
+    rating = models.IntegerField(
+        choices=list(zip(range(1, 11), range(1, 11))),
+        unique=True,
+        default=1
+    )
+
+    class Meta:
+        ordering = ['-created']
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        constraints = [models.UniqueConstraint(
+            fields=['author', 'title'],
+            name='unique_review'
+        )]
+
+
+class Comment(models.Model):
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        max_length=200,
+        verbose_name='Текст отзыва'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        max_length=200,
+        verbose_name='Автор'
+    )
+    text = models.TextField(verbose_name='Текст комментария',
+                            help_text="Введите текст комментария",
+                            )
+    created = models.DateTimeField(auto_now_add=True,
+                                   verbose_name='Дата публикации'
+                                   )
+
+    class Meta:
+        ordering = ['-created']
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
