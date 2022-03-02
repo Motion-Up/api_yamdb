@@ -1,7 +1,6 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 
-User = get_user_model()
+from users.models import CustomUser
 
 
 class Category(models.Model):
@@ -20,7 +19,7 @@ class Category(models.Model):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Genre(models.Model):
@@ -39,7 +38,7 @@ class Genre(models.Model):
         verbose_name_plural = 'Жанры'
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Title(models.Model):
@@ -55,9 +54,9 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория'
     )
-    genre = models.ManytomanyField(
+    genre = models.ManyToManyField(
         Genre,
-        related_name='titles',
+        related_name='names',
         verbose_name='Жанр'
     )
 
@@ -78,7 +77,7 @@ class Review(models.Model):
         verbose_name='Текст отзыва'
     )
     author = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='reviews',
         max_length=200,
@@ -115,7 +114,7 @@ class Comment(models.Model):
         verbose_name='Текст отзыва'
     )
     author = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='comments',
         max_length=200,

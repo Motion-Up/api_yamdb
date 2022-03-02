@@ -1,13 +1,17 @@
 from django.contrib import admin
 
-from .models import Comment, Review, Title
+from .models import Comment, Review, Title, Genre, Category
 
 
 class TitleAdmin(admin.ModelAdmin):
+    #def genres(self, obj):
+    #    all_genres = Genre.objects.filter(name=obj.genre)
+    #    return [genre for genre in all_genres]
+
     list_display = (
         'name',
+        #'genres',
         'category',
-        'genre',
     )
     search_fields = ('name',)
     list_filter = ('name',)
@@ -17,20 +21,19 @@ class TitleAdmin(admin.ModelAdmin):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = (
         'text',
-        'score',
+        'rating',
         'created',
         'author',
-        'titles'
+        'title'
     )
-    search_fields = ('text', 'created', 'author', 'score')
-    list_filter = ('created', 'score')
+    search_fields = ('text', 'created', 'author', 'rating')
+    list_filter = ('created', 'rating')
     empty_value_display = '-пусто-'
 
 
 class CommentAdmin(admin.ModelAdmin):
     list_display = (
-        'pk',
-        'reviews',
+        'review',
         'author',
         'text',
         'created'
@@ -41,6 +44,22 @@ class CommentAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+class GenreAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'slug'
+    )
+
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'slug'
+    )
+
+
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Title, TitleAdmin)
+admin.site.register(Genre, GenreAdmin)
+admin.site.register(Category, CategoryAdmin)
