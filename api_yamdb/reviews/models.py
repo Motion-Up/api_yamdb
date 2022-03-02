@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 
 
 class Category(models.Model):
@@ -51,7 +50,7 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория'
     )
-    genre = models.ManytomanyField(
+    genre = models.ManyToManyField(
         Genre,
         related_name='titles',
         verbose_name='Жанр'
