@@ -74,7 +74,7 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews',
         max_length=200,
-        verbose_name='Текст отзыва'
+        verbose_name='Произведение'
     )
     author = models.ForeignKey(
         CustomUser,
@@ -111,7 +111,7 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments',
         max_length=200,
-        verbose_name='Текст отзыва'
+        verbose_name='Отзыв'
     )
     author = models.ForeignKey(
         CustomUser,
