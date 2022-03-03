@@ -19,7 +19,7 @@ class Category(models.Model):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Genre(models.Model):
@@ -38,7 +38,7 @@ class Genre(models.Model):
         verbose_name_plural = 'Жанры'
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Title(models.Model):
@@ -54,9 +54,9 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория'
     )
-    genre = models.ManytomanyField(
+    genre = models.ManyToManyField(
         Genre,
-        related_name='titles',
+        related_name='names',
         verbose_name='Жанр'
     )
 
@@ -74,7 +74,7 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews',
         max_length=200,
-        verbose_name='Текст произведения'
+        verbose_name='Произведение'
     )
     author = models.ForeignKey(
         CustomUser,
@@ -111,7 +111,7 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments',
         max_length=200,
-        verbose_name='Текст отзыва'
+        verbose_name='Отзыв'
     )
     author = models.ForeignKey(
         CustomUser,

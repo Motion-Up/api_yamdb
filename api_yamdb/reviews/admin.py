@@ -1,13 +1,17 @@
 from django.contrib import admin
 
-from .models import Comment, Review, Title
+from .models import Comment, Review, Title, Genre, Category
 
 
 class TitleAdmin(admin.ModelAdmin):
+    def genres(self, obj):
+        all_genres = obj.genre.all()
+        return [genre for genre in all_genres]
+
     list_display = (
         'name',
+        'genres',
         'category',
-        'genre',
     )
     search_fields = ('name',)
     list_filter = ('name',)
@@ -40,6 +44,22 @@ class CommentAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+class GenreAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'slug'
+    )
+
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'slug'
+    )
+
+
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Title, TitleAdmin)
+admin.site.register(Genre, GenreAdmin)
+admin.site.register(Category, CategoryAdmin)
