@@ -9,6 +9,10 @@ class CustomUser(AbstractUser):
         default=False,
         help_text='Указывает является пользователь модераторм',
     )
+    bio = models.TextField(
+        'Биография',
+        blank=True,
+    )
 
     def save(self, *args, **kwargs):
         if self.is_staff is True:

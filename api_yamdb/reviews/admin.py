@@ -21,13 +21,13 @@ class TitleAdmin(admin.ModelAdmin):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = (
         'text',
-        'rating',
-        'created',
+        'score',
+        'pub_date',
         'author',
         'title'
     )
-    search_fields = ('text', 'created', 'author', 'rating')
-    list_filter = ('created', 'rating')
+    search_fields = ('text', 'pub_date', 'author', 'score')
+    list_filter = ('pub_date', 'score')
     empty_value_display = '-пусто-'
 
 
@@ -36,11 +36,11 @@ class CommentAdmin(admin.ModelAdmin):
         'review',
         'author',
         'text',
-        'created'
+        'pub_date'
     )
     list_display_links = ('text',)
     search_fields = ('text',)
-    list_filter = ('created',)
+    list_filter = ('pub_date',)
     empty_value_display = '-пусто-'
 
 
