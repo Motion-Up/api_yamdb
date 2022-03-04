@@ -1,17 +1,16 @@
 from django.db.models import Avg
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as django_filters
 from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import mixins, viewsets
 
-from .permission import AuthorOrReadOnly
+# from .permissions import AuthorOrReadOnly
 from .serializers import (CategorySerializer,
                           GenreSerializer,
                           TitleCreateSerializer,
                           TitleSerializer)
-from rest_framework import mixins, viewsets
 
-from reviews.models import Title, Genre, Title
+from reviews.models import Title, Genre, Category
 
 
 class CreateListDestroyMixin(mixins.CreateModelMixin, mixins.ListModelMixin,
@@ -24,20 +23,20 @@ class CategoryViewSet(CreateListDestroyMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     # permission_classes =
-    filter_backends = (SearchFilter, )
-    search_fields = ('name', )
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
 
 
 class GenreViewSet(CreateListDestroyMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (SearchFilter,)
-    search_fields = ('name', )
+    search_fields = ('name',)
 
 
-class TitleViewSet(ModelViewSet):
-    queryset = Title.objects.all().annotate(Avg('reviews__rating'))
-    filter_backends = (DjangoFilterBackend, )
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all().annotate(Avg('reviews__score'))
+    filter_backends = (django_filters.DjangoFilterBackend,)
     pagination_class = PageNumberPagination
 
     def get_serializer_class(self):

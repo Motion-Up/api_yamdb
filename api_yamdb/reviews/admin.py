@@ -4,13 +4,13 @@ from .models import Comment, Review, Title, Genre, Category
 
 
 class TitleAdmin(admin.ModelAdmin):
-    #def genres(self, obj):
-    #    all_genres = Genre.objects.filter(name=obj.genre)
-    #    return [genre for genre in all_genres]
+    def genres(self, obj):
+        all_genres = obj.genre.all()
+        return [genre for genre in all_genres]
 
     list_display = (
         'name',
-        #'genres',
+        'genres',
         'category',
     )
     search_fields = ('name',)
@@ -21,13 +21,13 @@ class TitleAdmin(admin.ModelAdmin):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = (
         'text',
-        'rating',
-        'created',
+        'score',
+        'pub_date',
         'author',
         'title'
     )
-    search_fields = ('text', 'created', 'author', 'rating')
-    list_filter = ('created', 'rating')
+    search_fields = ('text', 'pub_date', 'author', 'score')
+    list_filter = ('pub_date', 'score')
     empty_value_display = '-пусто-'
 
 
@@ -36,11 +36,11 @@ class CommentAdmin(admin.ModelAdmin):
         'review',
         'author',
         'text',
-        'created'
+        'pub_date'
     )
     list_display_links = ('text',)
     search_fields = ('text',)
-    list_filter = ('created',)
+    list_filter = ('pub_date',)
     empty_value_display = '-пусто-'
 
 
@@ -49,9 +49,6 @@ class GenreAdmin(admin.ModelAdmin):
         'name',
         'slug'
     )
-    search_fields = ('name',)
-    list_filter = ('name',)
-    empty_value_display = '-пусто-'
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -59,9 +56,6 @@ class CategoryAdmin(admin.ModelAdmin):
         'name',
         'slug'
     )
-    search_fields = ('name',)
-    list_filter = ('name',)
-    empty_value_display = '-пусто-'
 
 
 admin.site.register(Review, ReviewAdmin)
