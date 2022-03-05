@@ -9,7 +9,7 @@ from reviews.models import Review, Title  # noqa
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(Avg('reviews__rating'))
+    queryset = Title.objects.all().annotate(Avg('reviews__score'))
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

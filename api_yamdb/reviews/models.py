@@ -1,6 +1,6 @@
 from django.db import models
 
-from users.models import CustomUser  # noqa
+from users.models import CustomUser  # isort:skip
 
 
 class Category(models.Model):
@@ -59,6 +59,7 @@ class Title(models.Model):
         related_name='names',
         verbose_name='Жанр'
     )
+    year = models.IntegerField()
 
     class Meta:
         verbose_name = 'Произведение'
@@ -86,17 +87,17 @@ class Review(models.Model):
     text = models.TextField(verbose_name='Текст отзыва',
                             help_text="Введите текст отзыва",
                             )
-    created = models.DateTimeField(auto_now_add=True,
-                                   verbose_name='Дата публикации'
-                                   )
-    rating = models.IntegerField(
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации'
+    )
+    score = models.IntegerField(
         choices=list(zip(range(1, 11), range(1, 11))),
-        unique=True,
         default=1
     )
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['-pub_date']
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         constraints = [models.UniqueConstraint(
@@ -123,11 +124,11 @@ class Comment(models.Model):
     text = models.TextField(verbose_name='Текст комментария',
                             help_text="Введите текст комментария",
                             )
-    created = models.DateTimeField(auto_now_add=True,
-                                   verbose_name='Дата публикации'
-                                   )
+    pub_date = models.DateTimeField(auto_now_add=True,
+                                    verbose_name='Дата публикации'
+                                    )
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['-pub_date']
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
