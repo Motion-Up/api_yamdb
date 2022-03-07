@@ -1,10 +1,15 @@
-from django.urls import path
-from rest_framework_simplejwt import views as jwt_views
+from django.urls import path, include
+from rest_framework.routers import SimpleRouter
 
 from . import views
+
+
+router = SimpleRouter()
+router.register('users', views.UserView)
 
 urlpatterns = [
     # App User
     path('auth/signup/', views.RegisterView.as_view(), name='register'),
     path('auth/token/', views.create_token, name='token'),
+    path('', include(router.urls)),
 ]

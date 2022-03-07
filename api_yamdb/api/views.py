@@ -1,12 +1,14 @@
-from .serializers import RegisterSerializer, TokenSerializer
 from rest_framework import generics
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework import viewsets
 
 from users.models import CustomUser
+from .serializers import RegisterSerializer, TokenSerializer, UserSerializer
+from .permissions import IsAdminPermission
 
 
 class RegisterView(generics.CreateAPIView):
@@ -15,7 +17,7 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def create_token(request):
     user = get_object_or_404(
@@ -34,3 +36,9 @@ def create_token(request):
         {'data': serializer.errors},
         status=status.HTTP_400_BAD_REQUEST
     )
+
+
+class UserView(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAdminPermission,)

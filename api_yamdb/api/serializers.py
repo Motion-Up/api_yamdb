@@ -63,3 +63,9 @@ class TokenSerializer(TokenObtainPairSerializer):
         return {
             'token': str(refresh.access_token),
         }
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = CustomUser
