@@ -1,11 +1,18 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import generics, status, viewsets
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+from reviews.models import Review, Title  # noqa
+from users.models import CustomUser
 
 from .permission import AuthorOrReadOnly
-from .serializers import CommentSerializer, ReviewSerializer
-from reviews.models import Review, Title  # noqa
+from .permissions import IsAdminPermission
+from .serializers import (CommentSerializer, RegisterSerializer,
+                          ReviewSerializer, TokenSerializer, UserSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -39,3 +46,37 @@ class CommentViewSet(viewsets.ModelViewSet):
         review_id = self.kwargs.get("review_id")
         review = get_object_or_404(Review, id=review_id)
         serializer.save(author=self.request.user, review=review)
+
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = CustomUser.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_token(request):
+    user = get_object_or_404(
+        CustomUser,
+        username=request.data['username']
+    )
+    serializer = TokenSerializer(data=request.data)
+    if user.confirmation_code == request.data['confirmation_code']:
+        token = serializer.get_token(user)
+        return Response(
+            token,
+            status=status.HTTP_200_OK
+        )
+
+    return Response(
+        {'data': serializer.errors},
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+class UserView(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAdminPermission,)
