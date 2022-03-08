@@ -59,7 +59,8 @@ class Title(models.Model):
         related_name='names',
         verbose_name='Жанр'
     )
-    year = models.IntegerField('год')
+    year = models.IntegerField()
+
 
     class Meta:
         verbose_name = 'Произведение'
@@ -84,9 +85,10 @@ class Review(models.Model):
         max_length=200,
         verbose_name='Автор'
     )
-    text = models.TextField(verbose_name='Текст отзыва',
-                            help_text="Введите текст отзыва",
-                            )
+    text = models.TextField(
+        verbose_name='Текст отзыва',
+        help_text="Введите текст отзыва",
+    )
     pub_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата публикации'
@@ -121,12 +123,14 @@ class Comment(models.Model):
         max_length=200,
         verbose_name='Автор'
     )
-    text = models.TextField(verbose_name='Текст комментария',
-                            help_text="Введите текст комментария",
-                            )
-    pub_date = models.DateTimeField(auto_now_add=True,
-                                   verbose_name='Дата публикации'
-                                   )
+    text = models.TextField(
+        verbose_name='Текст комментария',
+        help_text="Введите текст комментария",
+    )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации'
+    )
 
     class Meta:
         ordering = ['-pub_date']

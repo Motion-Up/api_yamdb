@@ -14,9 +14,28 @@ class CustomUser(AbstractUser):
         blank=True,
     )
 
+    bio = models.TextField(
+        'Биография',
+        blank=True,
+    )
+    email = models.EmailField('email address', unique=True)
+    password = models.CharField(
+        'password',
+        max_length=128,
+        blank=True,
+        null=True
+    )
+    confirmation_code = models.CharField(
+        'confirmation code',
+        max_length=128,
+        blank=True
+    )
+
     def save(self, *args, **kwargs):
         if self.is_staff is True:
             self.is_moderator = True
+        elif self.is_staff is not True:
+            self.is_moderator = False
         super().save(*args, **kwargs)
         if self._password is not None:
             password_validation.password_changed(self._password, self)
