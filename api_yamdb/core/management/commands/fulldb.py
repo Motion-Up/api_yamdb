@@ -11,13 +11,8 @@ path_db = Path(dir_path, 'db.sqlite3')
 
 all_csv_files = {
     'users.csv': {
-<<<<<<< HEAD
-        'command': 'INSERT OR IGNORE INTO users_customuser (id, username, email, password, is_superuser, first_name, last_name, is_staff, is_active, date_joined, is_moderator, bio) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        'insert': f"[(row['id'], row['username'], row['email'], 'qqq', False, row['username'], row['username'], False, False, datetime.datetime.now(), False, 'Hello!')]"
-=======
         'command': 'INSERT OR IGNORE INTO users_customuser (id, username, email, password, is_superuser, first_name, last_name, is_staff, is_active, date_joined, is_moderator, bio, confirmation_code) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         'insert': f"[(row['id'], row['username'], row['email'], 'qqq', False, row['username'], row['username'], False, False, datetime.datetime.now(), False, 'Hello!', '')]"
->>>>>>> 580e7fde8f3f0fa50372bf6a238e67bade8754c0
     },
     'category.csv': {
         'command': 'INSERT OR IGNORE INTO reviews_category (name, slug) VALUES(?, ?)',

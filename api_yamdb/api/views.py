@@ -10,7 +10,7 @@ from reviews.models import Review, Title  # noqa
 from users.models import CustomUser
 
 from .permission import AuthorOrReadOnly
-from .permissions import IsAdminPermission
+from .permissions import IsAdminPermission, IsAuthorOnlyPermission
 from .serializers import (CommentSerializer, RegisterSerializer,
                           ReviewSerializer, TokenSerializer, UserSerializer)
 
@@ -46,7 +46,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         review_id = self.kwargs.get("review_id")
         review = get_object_or_404(Review, id=review_id)
         serializer.save(author=self.request.user, review=review)
-
 
 
 class RegisterView(generics.CreateAPIView):
