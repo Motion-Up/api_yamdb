@@ -1,4 +1,3 @@
-import re
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -56,5 +55,3 @@ class OwnerUserView(generics.RetrieveAPIView, generics.UpdateAPIView):
         obj = queryset.get(pk=self.request.user.pk)
         self.check_object_permissions(self.request, obj)
         return obj
-
-
