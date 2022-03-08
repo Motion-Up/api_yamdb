@@ -11,5 +11,6 @@ urlpatterns = [
     # App User
     path('auth/signup/', views.RegisterView.as_view(), name='register'),
     path('auth/token/', views.create_token, name='token'),
+    path('users/me/', views.OwnerUserView.as_view(), name='owner'),
     path('', include(router.urls)),
 ]
