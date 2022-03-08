@@ -1,16 +1,56 @@
 import re
+
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from rest_framework import generics
+from rest_framework import generics, mixins, viewsets
 
 from users.models import CustomUser
 from .serializers import RegisterSerializer, TokenSerializer, UserSerializer
 from .permissions import IsAdminPermission, IsAuthorOnlyPermission
+
+# from .permissions import AuthorOrReadOnly
+from .serializers import (CategorySerializer,
+                          GenreSerializer,
+                          TitleCreateSerializer,
+                          TitleSerializer)
+
+from reviews.models import Title, Genre, Category
+
+
+class CreateListDestroyMixin(mixins.CreateModelMixin, mixins.ListModelMixin,
+                             mixins.DestroyModelMixin,
+                             viewsets.GenericViewSet):
+    pass
+
+
+class CategoryViewSet(CreateListDestroyMixin):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    # permission_classes =
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
+
+
+class GenreViewSet(CreateListDestroyMixin):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all().annotate(Avg('reviews__score'))
+    filter_backends = (django_filters.DjangoFilterBackend,)
+    pagination_class = PageNumberPagination
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return TitleCreateSerializer
+        return TitleSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -56,5 +96,3 @@ class OwnerUserView(generics.RetrieveAPIView, generics.UpdateAPIView):
         obj = queryset.get(pk=self.request.user.pk)
         self.check_object_permissions(self.request, obj)
         return obj
-
-

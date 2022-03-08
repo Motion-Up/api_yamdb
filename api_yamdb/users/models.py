@@ -9,6 +9,10 @@ class CustomUser(AbstractUser):
         default=False,
         help_text='Указывает является пользователь модераторм',
     )
+    bio = models.TextField(
+        'Биография',
+        blank=True,
+    )
 
     bio = models.TextField(
         'Биография',
