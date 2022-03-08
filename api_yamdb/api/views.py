@@ -1,22 +1,55 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status, viewsets
+from django_filters import rest_framework as django_filters
+from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-
-from reviews.models import Review, Title  # noqa
+from reviews.models import Category, Genre, Review, Title
 from users.models import CustomUser
 
 from .permission import AuthorOrReadOnly
 from .permissions import IsAdminPermission, IsAuthorOnlyPermission
-from .serializers import (CommentSerializer, RegisterSerializer,
-                          ReviewSerializer, TokenSerializer, UserSerializer)
+# from .permissions import AuthorOrReadOnly
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, RegisterSerializer,
+                          ReviewSerializer, TitleCreateSerializer,
+                          TitleSerializer, TokenSerializer, UserSerializer)
+
+
+class CreateListDestroyMixin(mixins.CreateModelMixin, mixins.ListModelMixin,
+                             mixins.DestroyModelMixin,
+                             viewsets.GenericViewSet):
+    pass
+
+
+class CategoryViewSet(CreateListDestroyMixin):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    # permission_classes =
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
+
+
+class GenreViewSet(CreateListDestroyMixin):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().annotate(Avg('reviews__score'))
+    filter_backends = (django_filters.DjangoFilterBackend,)
+    pagination_class = PageNumberPagination
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return TitleCreateSerializer
+        return TitleSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -79,3 +112,15 @@ class UserView(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdminPermission,)
+
+
+class OwnerUserView(generics.RetrieveAPIView, generics.UpdateAPIView):
+    serializer_class = UserSerializer
+    queryset = CustomUser.objects.all()
+    permission_classes = (IsAuthorOnlyPermission,)
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = queryset.get(pk=self.request.user.pk)
+        self.check_object_permissions(self.request, obj)
+        return obj

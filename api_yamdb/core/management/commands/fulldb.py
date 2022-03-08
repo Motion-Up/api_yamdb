@@ -50,6 +50,7 @@ class Command(BaseCommand):
         for key, item in all_csv_files.items():
             insert_records = item['command']
             path_csv = Path(dir_path, 'static', 'data', key)
+
             with open(path_csv, newline='', encoding='UTF-8') as csvfile:
                 spamreader = csv.DictReader(csvfile)
                 for row in spamreader:
