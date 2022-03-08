@@ -61,6 +61,7 @@ class Title(models.Model):
     )
     year = models.IntegerField()
 
+
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
