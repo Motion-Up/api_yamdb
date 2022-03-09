@@ -1,11 +1,10 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Genre, Title
 from users.models import CustomUser
+from reviews.models import Comment, Review
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -47,8 +46,6 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Title
 
-from reviews.models import Comment, Review  # isort:skip
-
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
@@ -87,16 +84,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ('username', 'email',)
 
 
-class TokenSerializer(TokenObtainPairSerializer):
-
-    def get_token(self, user):
-        refresh = RefreshToken.for_user(user)
-        return {
-            'token': str(refresh.access_token),
-        }
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = CustomUser
+
+
+class TokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
+    confirmation_code = serializers.CharField()
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'confirmation_code')

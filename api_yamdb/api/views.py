@@ -1,10 +1,8 @@
-import random
-import string
-
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
 from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import SearchFilter
@@ -13,6 +11,7 @@ from rest_framework.pagination import (LimitOffsetPagination,
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Review, Title
 from users.models import CustomUser
@@ -24,7 +23,7 @@ from .permissions import (
 from .serializers import (
     CategorySerializer, CommentSerializer, GenreSerializer,
     RegisterSerializer, ReviewSerializer, TitleCreateSerializer,
-    TitleSerializer, TokenSerializer, UserSerializer
+    TitleSerializer, UserSerializer, TokenSerializer
 )
 
 
@@ -90,51 +89,51 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.CustomUser, review=review)
 
 
-class RegisterView(generics.CreateAPIView):
-    queryset = CustomUser.objects.all()
-    permission_classes = (AllowAny,)
-    serializer_class = RegisterSerializer
-
-    def create(self, request, *args, **kwargs):
-        letters_and_digits = string.ascii_letters + string.digits
-        rand_string = ''.join(random.sample(letters_and_digits, 8))
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            if serializer.data['username'] == 'me':
-                raise serializers.ValidationError(
-                    "Нельзя называть пользователя me"
-                )
-            user = CustomUser.objects.create(
-                username=serializer.data['username'],
-                email=serializer.data['email'],
-                password=rand_string,
-                confirmation_code=rand_string
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create(request):
+    serializer = RegisterSerializer(data=request.data)
+    if serializer.is_valid():
+        if serializer.data['username'] == 'me':
+            raise serializers.ValidationError(
+                "Нельзя называть пользователя me"
             )
-            user.save()
-            send_mail(
-                'Register code',
-                f'{rand_string}',
-                'admin@yandex.ru',
-                [serializer.data['email']],
-            )
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = CustomUser.objects.create(
+            username=serializer.data['username'],
+            email=serializer.data['email'],
+            password=serializer.data['email']
+        )
+        user.save()
+        confirmation_code = default_token_generator.make_token(user)
+        send_mail(
+            'Register code',
+            f'{confirmation_code}',
+            'admin@yandex.ru',
+            [serializer.data['email']],
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_token(request):
-    user = get_object_or_404(
-        CustomUser,
-        username=request.data['username']
-    )
     serializer = TokenSerializer(data=request.data)
-    if user.confirmation_code == request.data['confirmation_code']:
-        token = serializer.get_token(user)
-        return Response(
-            token,
-            status=status.HTTP_200_OK
+    if serializer.is_valid():
+        user = get_object_or_404(
+            CustomUser,
+            username=request.data['username']
         )
+        if default_token_generator.check_token(
+            user,
+            request.data['confirmation_code']
+        ):
+            token = AccessToken.for_user(user)
+            print(token)
+            return Response(
+                {'token': f'{token}'},
+                status=status.HTTP_200_OK
+            )
 
     return Response(
         {'message': 'Пользователь не обнаружен'},
