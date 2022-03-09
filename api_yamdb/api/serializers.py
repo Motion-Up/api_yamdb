@@ -8,7 +8,7 @@ from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Comment, Review
 from users.models import CustomUser
 
 
@@ -16,12 +16,10 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         exclude = ('id',)
-        # fields = '__all__'
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        # fields = '__all__'
         exclude = ('id',)
         model = Genre
 
@@ -51,11 +49,11 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Title
 
-from reviews.models import Comment, Review  # isort:skip
-
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = SlugRelatedField(slug_field='username', read_only=True)
+    author = SlugRelatedField(slug_field='username',
+                              read_only=True,
+                              default=serializers.CurrentUserDefault())
     title = SlugRelatedField(slug_field='id', many=False, read_only=True)
 
     class Meta:
