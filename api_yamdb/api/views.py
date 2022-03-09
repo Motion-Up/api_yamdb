@@ -11,18 +11,22 @@ from rest_framework.response import Response
 from reviews.models import Category, Genre, Review, Title
 from users.models import CustomUser
 
-from .permission import AuthorOrReadOnly
-from .permissions import IsAdminPermission, IsAuthorOnlyPermission
-# from .permissions import AuthorOrReadOnly
-from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, RegisterSerializer,
-                          ReviewSerializer, TitleCreateSerializer,
-                          TitleSerializer, TokenSerializer, UserSerializer)
+from .permissions import (
+    IsAdminPermission,
+    IsAuthorOnlyPermission,
+    AuthorOrReadOnly
+)
+from .serializers import (
+    CategorySerializer, CommentSerializer, GenreSerializer,
+    RegisterSerializer, ReviewSerializer, TitleCreateSerializer,
+    TitleSerializer, TokenSerializer, UserSerializer
+)
 
 
-class CreateListDestroyMixin(mixins.CreateModelMixin, mixins.ListModelMixin,
-                             mixins.DestroyModelMixin,
-                             viewsets.GenericViewSet):
+class CreateListDestroyMixin(
+    mixins.CreateModelMixin, mixins.ListModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
     pass
 
 
