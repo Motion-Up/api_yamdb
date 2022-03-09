@@ -1,6 +1,10 @@
+import random
+import string
+
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as django_filters
+from django.core.mail import send_mail
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import SearchFilter
@@ -8,9 +12,10 @@ from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework import serializers
+
 from reviews.models import Category, Genre, Review, Title
 from users.models import CustomUser
-
 from .permissions import (
     IsAdminPermission,
     IsAuthorOnlyPermission,
@@ -89,6 +94,31 @@ class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
+
+    def create(self, request, *args, **kwargs):
+        letters_and_digits = string.ascii_letters + string.digits
+        rand_string = ''.join(random.sample(letters_and_digits, 8))
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            if serializer.data['username'] == 'me':
+                raise serializers.ValidationError(
+                    "Нельзя называть пользователя me"
+                )
+            user = CustomUser.objects.create(
+                username=serializer.data['username'],
+                email=serializer.data['email'],
+                password=rand_string,
+                confirmation_code=rand_string
+            )
+            user.save()
+            send_mail(
+                'Register code',
+                f'{rand_string}',
+                'postmaster@sandboxd3d1ea751b8f42b395f3368371a3840c.mailgun.org',
+                [serializer.data['email']],
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
