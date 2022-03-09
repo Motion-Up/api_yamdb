@@ -1,4 +1,3 @@
-from django.contrib.auth import password_validation
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -25,11 +24,6 @@ class CustomUser(AbstractUser):
         blank=True,
         null=True
     )
-    confirmation_code = models.CharField(
-        'confirmation code',
-        max_length=128,
-        blank=True
-    )
     role = models.CharField(
         'Роль пользователя',
         max_length=20,
@@ -37,6 +31,8 @@ class CustomUser(AbstractUser):
     )
 
     def save(self, *args, **kwargs):
+        if self.is_superuser is True:
+            self.is_staff = True
         if self.is_staff is True:
             self.is_moderator = True
         elif self.is_staff is not True:
