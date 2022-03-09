@@ -114,7 +114,7 @@ class RegisterView(generics.CreateAPIView):
             send_mail(
                 'Register code',
                 f'{rand_string}',
-                'postmaster@sandboxd3d1ea751b8f42b395f3368371a3840c.mailgun.org',
+                'admin@yandex.ru',
                 [serializer.data['email']],
             )
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -137,7 +137,7 @@ def create_token(request):
         )
 
     return Response(
-        {'data': serializer.errors},
+        {'message': 'Пользователь не обнаружен'},
         status=status.HTTP_400_BAD_REQUEST
     )
 

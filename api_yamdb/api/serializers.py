@@ -88,12 +88,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(TokenObtainPairSerializer):
-    password = serializers.CharField()
-    username = serializers.CharField()
-
-    class Meta:
-        model = CustomUser
-        fields = ('password', 'username',)
 
     def get_token(self, user):
         refresh = RefreshToken.for_user(user)

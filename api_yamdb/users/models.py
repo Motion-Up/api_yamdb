@@ -46,6 +46,3 @@ class CustomUser(AbstractUser):
         elif self.is_moderator is True:
             self.role = 'moderator'
         super().save(*args, **kwargs)
-        if self._password is not None:
-            password_validation.password_changed(self._password, self)
-            self._password = None
