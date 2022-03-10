@@ -1,12 +1,11 @@
-import random
-import string
-
-from django.core.mail import send_mail
+from django.forms import CharField
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Genre, Title, Comment, Review
 from users.models import CustomUser
@@ -64,6 +63,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = '__all__'
 
+    def validate(self, data):
+        title = get_object_or_404(
+            Title, pk=self.context['view'].kwargs.get('title_id')
+        )
+        author = self.context['request'].user
+        if Review.objects.filter(title_id=title, author=author).exists():
+            raise serializers.ValidationError(
+                'Выуже оставили отзыв!'
+            )
+        return data
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -95,7 +104,36 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ('username', 'email',)
 
 
+class RegisterSerializer(serializers.ModelSerializer):
+
+    queryset = CustomUser.objects.all()
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=queryset)]
+    )
+    username = serializers.CharField(
+        validators=[UniqueValidator(queryset=queryset)],
+        required=True,
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'email',)
+
+
 class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
+        )
+        model = CustomUser
+        lookup_field = 'username'
+
+
+class OwnerSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+
     class Meta:
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',
