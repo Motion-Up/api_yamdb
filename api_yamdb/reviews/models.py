@@ -90,7 +90,7 @@ class Review(models.Model):
     )
     text = models.TextField(
         verbose_name='Текст отзыва',
-        help_text="Введите текст отзыва",
+        help_text="Введите текст отзыва"
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,

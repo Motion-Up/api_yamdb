@@ -36,7 +36,8 @@ class CreateListDestroyMixin(
 
 
 class CategoryViewSet(CreateListDestroyMixin):
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('-id')
+    pagination_class = PageNumberPagination
     serializer_class = CategorySerializer
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (SearchFilter,)
@@ -44,7 +45,8 @@ class CategoryViewSet(CreateListDestroyMixin):
 
 
 class GenreViewSet(CreateListDestroyMixin):
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('-id')
+    pagination_class = PageNumberPagination
     serializer_class = GenreSerializer
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (SearchFilter,)
@@ -52,8 +54,8 @@ class GenreViewSet(CreateListDestroyMixin):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(Avg('reviews__score'))
-    pagination_class = LimitOffsetPagination
+    queryset = Title.objects.all().annotate(Avg('reviews__score')).order_by('-id')
+    pagination_class = PageNumberPagination
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
@@ -67,7 +69,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [AuthorAdminModeratorOrReadOnly]
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
@@ -146,7 +148,7 @@ def create_token(request):
 
 
 class UserView(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
+    queryset = CustomUser.objects.all().order_by('-id')
     serializer_class = UserSerializer
     permission_classes = (IsAdminPermission,)
     lookup_field = 'username'
