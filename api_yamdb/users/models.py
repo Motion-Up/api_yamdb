@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.exceptions import SuspiciousOperation
 
 
 class CustomUser(AbstractUser):
@@ -33,4 +34,6 @@ class CustomUser(AbstractUser):
     def save(self, *args, **kwargs):
         if self.role == 'admin':
             self.is_staff = True
+        if self.role not in ['user', 'admin', 'moderator']:
+            raise SuspiciousOperation('Нельзя давать свои значения!')
         super().save(*args, **kwargs)
