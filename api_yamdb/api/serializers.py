@@ -11,6 +11,7 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         exclude = ('id',)
+        lookup_field = 'slug'
         # fields = '__all__'
 
 
@@ -18,6 +19,7 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         # fields = '__all__'
         exclude = ('id',)
+        lookup_field = 'slug'
         model = Genre
 
 
