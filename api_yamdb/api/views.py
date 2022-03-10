@@ -23,7 +23,7 @@ from .permissions import (
 from .serializers import (
     CategorySerializer, CommentSerializer, GenreSerializer,
     RegisterSerializer, ReviewSerializer, TitleCreateSerializer,
-    TitleSerializer, UserSerializer, TokenSerializer
+    TitleSerializer, UserSerializer, TokenSerializer, OwnerSerializer
 )
 
 
@@ -93,6 +93,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def create_user(request):
     serializer = RegisterSerializer(data=request.data)
+    print(serializer)
     if serializer.is_valid(raise_exception=True):
         if serializer.data['username'] == 'me':
             raise serializers.ValidationError(
@@ -129,7 +130,6 @@ def create_token(request):
             request.data['confirmation_code']
         ):
             token = AccessToken.for_user(user)
-            print(token)
             return Response(
                 {'token': f'{token}'},
                 status=status.HTTP_200_OK
@@ -149,7 +149,7 @@ class UserView(viewsets.ModelViewSet):
 
 
 class OwnerUserView(generics.RetrieveAPIView, generics.UpdateAPIView):
-    serializer_class = UserSerializer
+    serializer_class = OwnerSerializer
     queryset = CustomUser.objects.all()
     permission_classes = (IsAuthorOnlyPermission,)
 

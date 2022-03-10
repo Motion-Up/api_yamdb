@@ -1,3 +1,4 @@
+from django.forms import CharField
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
@@ -85,6 +86,18 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
+        )
+        model = CustomUser
+        lookup_field = 'username'
+
+
+class OwnerSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+
     class Meta:
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',

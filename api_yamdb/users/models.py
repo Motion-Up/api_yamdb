@@ -31,16 +31,6 @@ class CustomUser(AbstractUser):
     )
 
     def save(self, *args, **kwargs):
-        if self.is_superuser is True:
+        if self.role == 'admin':
             self.is_staff = True
-        if self.is_staff is True:
-            self.is_moderator = True
-        elif self.is_staff is not True:
-            self.is_moderator = False
-        if self.is_staff is True:
-            self.role = 'admin'
-        elif self.is_moderator is True:
-            self.role = 'moderator'
-        else:
-            self.role = 'user'
         super().save(*args, **kwargs)
