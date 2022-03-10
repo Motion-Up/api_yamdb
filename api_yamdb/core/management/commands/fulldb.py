@@ -1,7 +1,7 @@
 import csv
 import datetime
-import sqlite3
 import pathlib
+import sqlite3
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
@@ -11,8 +11,8 @@ path_db = Path(dir_path, 'db.sqlite3')
 
 all_csv_files = {
     'users.csv': {
-        'command': 'INSERT OR IGNORE INTO users_customuser (id, username, email, password, is_superuser, first_name, last_name, is_staff, is_active, date_joined, is_moderator, bio) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        'insert': f"[(row['id'], row['username'], row['email'], 'qqq', False, row['username'], row['username'], False, False, datetime.datetime.now(), False, 'Hello!')]"
+        'command': 'INSERT OR IGNORE INTO users_customuser (id, username, email, password, is_superuser, first_name, last_name, is_staff, is_active, date_joined, bio, confirmation_code) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'insert': f"[(row['id'], row['username'], row['email'], 'qqq', False, row['username'], row['username'], False, False, datetime.datetime.now(), 'Hello!', '')]"
     },
     'category.csv': {
         'command': 'INSERT OR IGNORE INTO reviews_category (name, slug) VALUES(?, ?)',
@@ -38,7 +38,6 @@ all_csv_files = {
         'command': 'INSERT OR IGNORE INTO reviews_comment (review_id, text, author_id, pub_date) VALUES(?, ?, ?, ?)',
         'insert': "[(row['review_id'], row['text'], row['author'], row['pub_date'])]"
     },
-    
 }
 
 
@@ -51,6 +50,7 @@ class Command(BaseCommand):
         for key, item in all_csv_files.items():
             insert_records = item['command']
             path_csv = Path(dir_path, 'static', 'data', key)
+
             with open(path_csv, newline='', encoding='UTF-8') as csvfile:
                 spamreader = csv.DictReader(csvfile)
                 for row in spamreader:
@@ -62,20 +62,3 @@ class Command(BaseCommand):
         connection.close()
 
         self.stdout.write('Записи добавленны в бд!')
-
-#def handle(self, *args, **options):
-#        connection = sqlite3.connect(path_db)
-#        cursor = connection.cursor()
-#        for key, item in all_csv_files.items():
-#        insert_records = "INSERT INTO reviews_category (name, slug) VALUES(?, ?)"
-#        with open(path_csv, newline='') as csvfile:
-#            spamreader = csv.DictReader(csvfile)
-#            for row in spamreader:
-#                cursor.executemany(
-#                    insert_records,
-#                    [(row['name'], row['slug'])]
-#                )
-#                connection.commit()
-#        connection.close()
-#
-#        self.stdout.write('Записи добавленны в бд!')
