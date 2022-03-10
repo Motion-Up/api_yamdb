@@ -151,14 +151,14 @@ def create_token(request):
 class UserView(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminPermission,)
     lookup_field = 'username'
 
 
 class OwnerUserView(generics.RetrieveAPIView, generics.UpdateAPIView):
     serializer_class = OwnerSerializer
     queryset = CustomUser.objects.all()
-    permission_classes = (AuthorOrReadOnly,)
+    permission_classes = (IsAuthorOnlyPermission,)
 
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
