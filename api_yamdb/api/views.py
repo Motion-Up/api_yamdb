@@ -1,34 +1,25 @@
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django_filters import rest_framework as django_filters
 from django_filters.rest_framework import DjangoFilterBackend
-from django.core.mail import send_mail
-from django.contrib.auth.tokens import default_token_generator
-from rest_framework import generics, mixins, status, viewsets
+from rest_framework import generics, mixins, serializers, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import SearchFilter
-from rest_framework.pagination import (LimitOffsetPagination,
-                                       PageNumberPagination)
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import serializers
 from rest_framework_simplejwt.tokens import AccessToken
-
 from reviews.models import Category, Genre, Review, Title
 from users.models import CustomUser
-from .permissions import (
-    IsAdminOrReadOnly,
-    AuthorAdminModeratorOrReadOnly,
-    IsAuthorOnlyPermission,
-    AuthorOrReadOnly,
-    IsAdminPermission
-)
-from .serializers import (
-    CategorySerializer, CommentSerializer, GenreSerializer,
-    RegisterSerializer, ReviewSerializer, TitleCreateSerializer,
-    TitleSerializer, UserSerializer, TokenSerializer, OwnerSerializer
-)
+
 from .filters import TitleFilter
+from .permissions import (AuthorAdminModeratorOrReadOnly, IsAdminOrReadOnly,
+                          IsAdminPermission, IsAuthorOnlyPermission)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, OwnerSerializer, RegisterSerializer,
+                          ReviewSerializer, TitleCreateSerializer,
+                          TitleSerializer, TokenSerializer, UserSerializer)
 
 
 class CreateListDestroyMixin(
@@ -44,7 +35,8 @@ class CategoryViewSet(CreateListDestroyMixin):
     serializer_class = CategorySerializer
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (SearchFilter,)
-    search_fields = ('name',)
+    search_fields = ('=name',)
+    lookup_field = 'slug'
 
 
 class GenreViewSet(CreateListDestroyMixin):
@@ -53,11 +45,14 @@ class GenreViewSet(CreateListDestroyMixin):
     serializer_class = GenreSerializer
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (SearchFilter,)
-    search_fields = ('name',)
+    search_fields = ('=name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(Avg('reviews__score')).order_by('-id')
+    queryset = Title.objects.all().annotate(
+        Avg('reviews__score')
+    ).order_by('-id')
     pagination_class = PageNumberPagination
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
