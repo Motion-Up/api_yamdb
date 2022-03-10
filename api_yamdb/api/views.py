@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Review, Title
 from users.models import CustomUser
+
 from .filters import TitleFilter
 from .permissions import (AuthorAdminModeratorOrReadOnly, IsAdminOrReadOnly,
                           IsAdminPermission, IsAuthorOnlyPermission)
@@ -28,7 +29,7 @@ class CreateListDestroyMixin(
     pass
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(CreateListDestroyMixin):
     queryset = Category.objects.all().order_by('-id')
     pagination_class = PageNumberPagination
     serializer_class = CategorySerializer
@@ -38,7 +39,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(CreateListDestroyMixin):
     queryset = Genre.objects.all().order_by('-id')
     pagination_class = PageNumberPagination
     serializer_class = GenreSerializer
