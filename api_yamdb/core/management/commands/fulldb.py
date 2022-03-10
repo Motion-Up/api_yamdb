@@ -14,7 +14,7 @@ all_csv_files = {
         "email, password, is_superuser, first_name, last_name, is_staff, "
         "is_active, date_joined, is_moderator, bio, role) VALUES(?, ?, "
         "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        'insert': f"[(row['id'], row['username'], row['email'], 'qqq', "
+        'insert': "[(row['id'], row['username'], row['email'], 'qqq', "
         "False, row['username'], row['username'], False, False, "
         "datetime.datetime.now(), False, 'Hello!', row['role'])]"
     },
