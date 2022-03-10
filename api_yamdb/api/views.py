@@ -91,9 +91,9 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def create(request):
+def create_user(request):
     serializer = RegisterSerializer(data=request.data)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         if serializer.data['username'] == 'me':
             raise serializers.ValidationError(
                 "Нельзя называть пользователя me"
@@ -122,7 +122,7 @@ def create_token(request):
     if serializer.is_valid():
         user = get_object_or_404(
             CustomUser,
-            username=request.data['username']
+            username=serializer.data['username']
         )
         if default_token_generator.check_token(
             user,
@@ -145,6 +145,7 @@ class UserView(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdminPermission,)
+    lookup_field = 'username'
 
 
 class OwnerUserView(generics.RetrieveAPIView, generics.UpdateAPIView):

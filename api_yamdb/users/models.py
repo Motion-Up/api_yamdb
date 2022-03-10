@@ -41,4 +41,6 @@ class CustomUser(AbstractUser):
             self.role = 'admin'
         elif self.is_moderator is True:
             self.role = 'moderator'
+        else:
+            self.role = 'user'
         super().save(*args, **kwargs)
