@@ -1,10 +1,6 @@
-from django.forms import CharField
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Genre, Title, Comment, Review
@@ -73,6 +69,7 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Выуже оставили отзыв!'
             )
         return data
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
