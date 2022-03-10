@@ -1,9 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from rest_framework.validators import UniqueValidator
-
-from reviews.models import Category, Genre, Title, Comment, Review
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import CustomUser
 
 
@@ -12,15 +10,14 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         exclude = ('id',)
         lookup_field = 'slug'
-        # fields = '__all__'
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        # fields = '__all__'
         exclude = ('id',)
         lookup_field = 'slug'
         model = Genre
+        lookup_field = 'slug'
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -42,10 +39,15 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
-    rating = serializers.IntegerField(source='reviews__score__avg', read_only=True)
+    rating = serializers.IntegerField(
+        source='reviews__score__avg',
+        read_only=True
+    )
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'name', 'year',
+                  'description', 'genre', 'category', 'rating'
+                  )
         model = Title
 
 
@@ -55,13 +57,19 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
-    title = serializers.SlugRelatedField(slug_field='id', many=False, read_only=True)
+    title = serializers.SlugRelatedField(
+        slug_field='id',
+        many=False,
+        read_only=True
+    )
 
     class Meta:
         model = Review
         fields = '__all__'
 
     def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
         title = get_object_or_404(
             Title, pk=self.context['view'].kwargs.get('title_id')
         )
@@ -79,7 +87,11 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
-    review = serializers.SlugRelatedField(slug_field='text', many=False, read_only=True)
+    review = serializers.SlugRelatedField(
+        slug_field='text',
+        many=False,
+        read_only=True
+    )
 
     class Meta:
         model = Comment

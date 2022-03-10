@@ -1,6 +1,6 @@
 from django.db import models
+
 from api_yamdb.settings import AUTH_USER_MODEL
-from users.models import CustomUser as User  # isort:skip
 
 
 class Category(models.Model):
