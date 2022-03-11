@@ -1,6 +1,6 @@
 from django.db import models
 
-from users.models import CustomUser  # isort:skip
+from api_yamdb.settings import AUTH_USER_MODEL
 
 
 class Category(models.Model):
@@ -54,6 +54,10 @@ class Title(models.Model):
         related_name='category',
         verbose_name='Категория'
     )
+    description = models.TextField(
+        max_length=200,
+        blank=True
+    )
     genre = models.ManyToManyField(
         Genre,
         related_name='genre',
@@ -78,7 +82,7 @@ class Review(models.Model):
         verbose_name='Произведение'
     )
     author = models.ForeignKey(
-        CustomUser,
+        AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='reviews',
         max_length=200,
@@ -86,7 +90,7 @@ class Review(models.Model):
     )
     text = models.TextField(
         verbose_name='Текст отзыва',
-        help_text="Введите текст отзыва",
+        help_text="Введите текст отзыва"
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
@@ -119,7 +123,7 @@ class Comment(models.Model):
         verbose_name='Отзыв'
     )
     author = models.ForeignKey(
-        CustomUser,
+        AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='comments',
         max_length=200,
