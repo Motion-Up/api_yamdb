@@ -1,6 +1,6 @@
 from django.db import models
-
 from api_yamdb.settings import AUTH_USER_MODEL
+from .validators import validate_year
 
 
 class Category(models.Model):
@@ -51,7 +51,7 @@ class Title(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='category',
+        related_name='titles',
         verbose_name='Категория'
     )
     description = models.TextField(
@@ -60,10 +60,12 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        related_name='genre',
+        related_name='titles',
         verbose_name='Жанр'
     )
-    year = models.IntegerField()
+    year = models.IntegerField(
+        validators=(validate_year,),
+    )
 
     class Meta:
         verbose_name = 'Произведение'

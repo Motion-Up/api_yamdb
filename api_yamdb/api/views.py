@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, mixins, serializers, status, viewsets
+from rest_framework import generics, serializers, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
@@ -21,13 +21,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, OwnerSerializer, RegisterSerializer,
                           ReviewSerializer, TitleCreateSerializer,
                           TitleSerializer, TokenSerializer, UserSerializer)
-
-
-class CreateListDestroyMixin(
-    mixins.CreateModelMixin, mixins.ListModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    pass
+from .mixins import CreateListDestroyMixin
 
 
 class CategoryViewSet(CreateListDestroyMixin):
@@ -37,7 +31,6 @@ class CategoryViewSet(CreateListDestroyMixin):
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (SearchFilter,)
     search_fields = ('=name',)
-    lookup_field = 'slug'
 
 
 class GenreViewSet(CreateListDestroyMixin):
@@ -47,7 +40,6 @@ class GenreViewSet(CreateListDestroyMixin):
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (SearchFilter,)
     search_fields = ('=name',)
-    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -59,11 +51,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
 
-
-def get_serializer_class(self):
-    if self.action in ('create', 'update', 'partial_update'):
-        return TitleCreateSerializer
-    return TitleSerializer
+    def get_serializer_class(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return TitleCreateSerializer
+        return TitleSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

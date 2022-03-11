@@ -18,7 +18,6 @@ class GenreSerializer(serializers.ModelSerializer):
         exclude = ('id',)
         lookup_field = 'slug'
         model = Genre
-        lookup_field = 'slug'
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):

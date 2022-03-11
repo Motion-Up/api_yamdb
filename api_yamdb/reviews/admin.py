@@ -4,10 +4,6 @@ from .models import Category, Comment, Genre, Review, Title
 
 
 class TitleAdmin(admin.ModelAdmin):
-    def genres(self, obj):
-        all_genres = obj.genre.all()
-        return [genre for genre in all_genres]
-
     list_display = (
         'name',
         'genres',
@@ -16,6 +12,10 @@ class TitleAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_filter = ('name',)
     empty_value_display = '-пусто-'
+
+    def display_genres(self, obj):
+        all_genres = obj.genre.all()
+        return [genre for genre in all_genres]
 
 
 class ReviewAdmin(admin.ModelAdmin):
