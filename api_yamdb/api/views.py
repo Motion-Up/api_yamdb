@@ -11,9 +11,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import Category, Genre, Review, Title
-from users.models import CustomUser
-
 from .filters import TitleFilter
 from .permissions import (AuthorAdminModeratorOrReadOnly, IsAdminOrReadOnly,
                           IsAdminPermission, IsAuthorOnlyPermission)
@@ -21,6 +18,8 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, OwnerSerializer, RegisterSerializer,
                           ReviewSerializer, TitleCreateSerializer,
                           TitleSerializer, TokenSerializer, UserSerializer)
+from reviews.models import Category, Genre, Review, Title  # isort:skip
+from users.models import CustomUser  # isort:skip
 
 
 class CreateListDestroyMixin(

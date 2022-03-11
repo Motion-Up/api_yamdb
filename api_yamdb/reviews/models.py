@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from api_yamdb.settings import AUTH_USER_MODEL
@@ -97,8 +98,10 @@ class Review(models.Model):
         verbose_name='Дата публикации'
     )
     score = models.IntegerField(
-        choices=list(zip(range(1, 11), range(1, 11))),
-        default=1
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(11)
+        ]
     )
 
     class Meta:

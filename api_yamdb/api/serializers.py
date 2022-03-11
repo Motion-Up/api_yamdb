@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import CustomUser
 
@@ -77,7 +76,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         author = self.context['request'].user
         if Review.objects.filter(title_id=title, author=author).exists():
             raise serializers.ValidationError(
-                'Выуже оставили отзыв!'
+                'Вы уже оставили отзыв!'
             )
         return data
 
