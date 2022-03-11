@@ -1,14 +1,8 @@
-import random
-import string
-
-from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import Category, Genre, Title, Comment, Review
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import CustomUser
 
 
@@ -16,14 +10,15 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         exclude = ('id',)
-        # fields = '__all__'
+        lookup_field = 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        # fields = '__all__'
         exclude = ('id',)
+        lookup_field = 'slug'
         model = Genre
+        lookup_field = 'slug'
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -45,10 +40,15 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
-    rating = serializers.IntegerField(source='reviews__score__avg', read_only=True)
+    rating = serializers.IntegerField(
+        source='reviews__score__avg',
+        read_only=True
+    )
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'name', 'year',
+                  'description', 'genre', 'category', 'rating'
+                  )
         model = Title
 
 
@@ -58,11 +58,28 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
-    title = serializers.SlugRelatedField(slug_field='id', many=False, read_only=True)
+    title = serializers.SlugRelatedField(
+        slug_field='id',
+        many=False,
+        read_only=True
+    )
 
     class Meta:
         model = Review
         fields = '__all__'
+
+    def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
+        title = get_object_or_404(
+            Title, pk=self.context['view'].kwargs.get('title_id')
+        )
+        author = self.context['request'].user
+        if Review.objects.filter(title_id=title, author=author).exists():
+            raise serializers.ValidationError(
+                'Выуже оставили отзыв!'
+            )
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -71,7 +88,11 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
-    review = serializers.SlugRelatedField(slug_field='text', many=False, read_only=True)
+    review = serializers.SlugRelatedField(
+        slug_field='text',
+        many=False,
+        read_only=True
+    )
 
     class Meta:
         model = Comment
@@ -79,8 +100,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    letters_and_digits = string.ascii_letters + string.digits
-    rand_string = ''.join(random.sample(letters_and_digits, 8))
 
     queryset = CustomUser.objects.all()
     email = serializers.EmailField(
@@ -96,44 +115,49 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('username', 'email',)
 
-    def create(self, validated_data):
-        if validated_data['username'] == 'me':
-            raise serializers.ValidationError(
-                "Нельзя называть пользователя me"
-            )
-        user = CustomUser.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=self.rand_string,
-            confirmation_code=self.rand_string
-        )
 
-        user.save()
-        send_mail(
-            'Register code',
-            f'{self.rand_string}',
-            'postmaster@sandboxd3d1ea751b8f42b395f3368371a3840c.mailgun.org',
-            [validated_data['email']]
-        )
-        return user
+class RegisterSerializer(serializers.ModelSerializer):
 
-
-class TokenSerializer(TokenObtainPairSerializer):
-    password = serializers.CharField()
-    username = serializers.CharField()
+    queryset = CustomUser.objects.all()
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=queryset)]
+    )
+    username = serializers.CharField(
+        validators=[UniqueValidator(queryset=queryset)],
+        required=True,
+    )
 
     class Meta:
         model = CustomUser
-        fields = ('password', 'username',)
-
-    def get_token(self, user):
-        refresh = RefreshToken.for_user(user)
-        return {
-            'token': str(refresh.access_token),
-        }
+        fields = ('username', 'email',)
 
 
 class UserSerializer(serializers.ModelSerializer):
+
     class Meta:
-        fields = '__all__'
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
+        )
         model = CustomUser
+        lookup_field = 'username'
+
+
+class OwnerSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+
+    class Meta:
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
+        )
+        model = CustomUser
+        lookup_field = 'username'
+
+
+class TokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
+    confirmation_code = serializers.CharField()
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'confirmation_code')

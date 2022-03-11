@@ -1,6 +1,6 @@
 from django.db import models
+
 from api_yamdb.settings import AUTH_USER_MODEL
-from users.models import CustomUser as User  # isort:skip
 
 
 class Category(models.Model):
@@ -90,7 +90,7 @@ class Review(models.Model):
     )
     text = models.TextField(
         verbose_name='Текст отзыва',
-        help_text="Введите текст отзыва",
+        help_text="Введите текст отзыва"
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,

@@ -14,7 +14,6 @@ executing==0.8.3
 flake8==4.0.1
 idna==3.3
 iniconfig==1.1.1
-ipython==8.1.1
 jedi==0.18.1
 matplotlib-inline==0.1.3
 mccabe==0.6.1
