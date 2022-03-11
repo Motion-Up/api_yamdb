@@ -1,5 +1,4 @@
 import csv
-import datetime  # noqa
 import pathlib
 import sqlite3
 from pathlib import Path
