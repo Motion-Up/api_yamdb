@@ -50,13 +50,14 @@ class GenreViewSet(CreateListDestroyMixin):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(
-        Avg('reviews__score')
-    ).order_by('-id')
     pagination_class = PageNumberPagination
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
+
+    def get_queryset(self):
+        return Title.objects.all().annotate(
+            rating=Avg('reviews__score')).order_by('-id')
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
