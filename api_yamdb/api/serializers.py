@@ -18,7 +18,6 @@ class GenreSerializer(serializers.ModelSerializer):
         exclude = ('id',)
         lookup_field = 'slug'
         model = Genre
-        lookup_field = 'slug'
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -41,8 +40,7 @@ class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
     rating = serializers.IntegerField(
-        source='reviews__score__avg',
-        read_only=True
+        required=False
     )
 
     class Meta:
@@ -77,7 +75,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         author = self.context['request'].user
         if Review.objects.filter(title_id=title, author=author).exists():
             raise serializers.ValidationError(
-                'Выуже оставили отзыв!'
+                'Вы уже оставили отзыв!'
             )
         return data
 

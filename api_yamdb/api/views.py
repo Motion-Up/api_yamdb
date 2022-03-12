@@ -3,32 +3,26 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, mixins, status, viewsets
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework import generics, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import Category, Genre, Review, Title
-from users.models import CustomUser
+from api_yamdb.settings import ADMIN_EMAIL
 
 from .filters import TitleFilter
+from .mixins import CreateListDestroyMixin
 from .permissions import (AuthorAdminModeratorOrReadOnly, IsAdminOrReadOnly,
                           IsAdminPermission, IsAuthorOnlyPermission)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, OwnerSerializer, RegisterSerializer,
                           ReviewSerializer, TitleCreateSerializer,
                           TitleSerializer, TokenSerializer, UserSerializer)
-from api_yamdb.settings import ADMIN_EMAIL
-
-
-class CreateListDestroyMixin(
-    mixins.CreateModelMixin, mixins.ListModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    pass
+from reviews.models import Category, Genre, Review, Title  # isort:skip
+from users.models import CustomUser  # isort:skip
 
 
 class CategoryViewSet(CreateListDestroyMixin):
@@ -52,13 +46,14 @@ class GenreViewSet(CreateListDestroyMixin):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(
-        Avg('reviews__score')
-    ).order_by('-id')
     pagination_class = PageNumberPagination
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
+
+    def get_queryset(self):
+        return Title.objects.all().annotate(
+            rating=Avg('reviews__score')).order_by('-id')
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
