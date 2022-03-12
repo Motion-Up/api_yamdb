@@ -1,19 +1,16 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import SuspiciousOperation
 from django.db import models
 
 
 class CustomUser(AbstractUser):
-    is_moderator = models.BooleanField(
-        'moderator status',
-        default=False,
-        help_text='Указывает является пользователь модераторм',
-    )
-    bio = models.TextField(
-        'Биография',
-        blank=True,
-    )
-
+    USER = 'user'
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER_ROLE = [
+        (USER, 'user'),
+        (ADMIN, 'admin'),
+        (MODERATOR, 'moderator')
+    ]
     bio = models.TextField(
         'Биография',
         blank=True,
@@ -28,12 +25,23 @@ class CustomUser(AbstractUser):
     role = models.CharField(
         'Роль пользователя',
         max_length=20,
-        default='user'
+        choices=USER_ROLE,
+        default=USER
     )
 
     def save(self, *args, **kwargs):
-        if self.role == 'admin':
+        if self.role == self.ADMIN:
             self.is_staff = True
-        if self.role not in ['user', 'admin', 'moderator']:
-            raise SuspiciousOperation('Нельзя давать свои значения!')
         super().save(*args, **kwargs)
+
+    @property
+    def is_admin(self):
+        if self.role == self.ADMIN:
+            return True
+        return False
+
+    @property
+    def is_moderator(self):
+        if self.role == self.MODERATOR:
+            return True
+        return False

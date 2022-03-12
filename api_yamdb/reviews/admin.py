@@ -4,18 +4,18 @@ from .models import Category, Comment, Genre, Review, Title
 
 
 class TitleAdmin(admin.ModelAdmin):
-    def genres(self, obj):
-        all_genres = obj.genre.all()
-        return [genre for genre in all_genres]
-
     list_display = (
         'name',
-        'genres',
+        'get_genres',
         'category',
     )
     search_fields = ('name',)
     list_filter = ('name',)
     empty_value_display = '-пусто-'
+
+    def get_genres(self, obj_genre):
+        all_genres = obj_genre.genre.values_list('name', flat=True)
+        return [genre for genre in all_genres]
 
 
 class ReviewAdmin(admin.ModelAdmin):

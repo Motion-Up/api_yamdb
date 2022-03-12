@@ -115,22 +115,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('username', 'email',)
 
-
-class RegisterSerializer(serializers.ModelSerializer):
-
-    queryset = CustomUser.objects.all()
-    email = serializers.EmailField(
-        required=True,
-        validators=[UniqueValidator(queryset=queryset)]
-    )
-    username = serializers.CharField(
-        validators=[UniqueValidator(queryset=queryset)],
-        required=True,
-    )
-
-    class Meta:
-        model = CustomUser
-        fields = ('username', 'email',)
+    def validate(self, data):
+        if data['username'] == 'me':
+            raise serializers.ValidationError("Нельзя подписаться на себя!")
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):

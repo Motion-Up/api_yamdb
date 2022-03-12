@@ -12,11 +12,11 @@ all_csv_files = {
     'users.csv': {
         'command': "INSERT OR IGNORE INTO users_customuser (id, username, "
         "email, password, is_superuser, first_name, last_name, is_staff, "
-        "is_active, date_joined, is_moderator, bio, role) VALUES(?, ?, "
-        "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "is_active, date_joined, bio, role) VALUES(?, ?, "
+        "?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         'insert': "[(row['id'], row['username'], row['email'], 'qqq', "
         "False, row['username'], row['username'], False, False, "
-        "datetime.datetime.now(), False, 'Hello!', row['role'])]"
+        "datetime.datetime.now(), 'Hello!', row['role'])]"
     },
     'category.csv': {
         'command': "INSERT OR IGNORE INTO reviews_category (name, slug) "

@@ -3,11 +3,11 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, mixins, serializers, status, viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import generics, mixins, status, viewsets
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -21,6 +21,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, OwnerSerializer, RegisterSerializer,
                           ReviewSerializer, TitleCreateSerializer,
                           TitleSerializer, TokenSerializer, UserSerializer)
+from api_yamdb.settings import ADMIN_EMAIL
 
 
 class CreateListDestroyMixin(
@@ -98,48 +99,41 @@ class CommentViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def create_user(request):
     serializer = RegisterSerializer(data=request.data)
-    print(serializer)
-    if serializer.is_valid(raise_exception=True):
-        if serializer.data['username'] == 'me':
-            raise serializers.ValidationError(
-                "Нельзя называть пользователя me"
-            )
-        user = CustomUser.objects.create(
-            username=serializer.data['username'],
-            email=serializer.data['email'],
-            password=serializer.data['email']
-        )
-        user.save()
-        confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            'Register code',
-            f'{confirmation_code}',
-            'admin@yandex.ru',
-            [serializer.data['email']],
-        )
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    user = CustomUser.objects.create(
+        username=serializer.validated_data['username'],
+        email=serializer.validated_data['email'],
+        password=serializer.validated_data['email']
+    )
+    user.save()
+    confirmation_code = default_token_generator.make_token(user)
+    send_mail(
+        'Register code',
+        f'{confirmation_code}',
+        ADMIN_EMAIL,
+        [serializer.data['email']],
+    )
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_token(request):
     serializer = TokenSerializer(data=request.data)
-    if serializer.is_valid():
-        user = get_object_or_404(
-            CustomUser,
-            username=serializer.data['username']
+    serializer.is_valid(raise_exception=True)
+    user = get_object_or_404(
+        CustomUser,
+        username=serializer.validated_data['username']
+    )
+    if default_token_generator.check_token(
+        user,
+        serializer.validated_data['confirmation_code']
+    ):
+        token = AccessToken.for_user(user)
+        return Response(
+            {'token': f'{token}'},
+            status=status.HTTP_200_OK
         )
-        if default_token_generator.check_token(
-            user,
-            request.data['confirmation_code']
-        ):
-            token = AccessToken.for_user(user)
-            return Response(
-                {'token': f'{token}'},
-                status=status.HTTP_200_OK
-            )
-
     return Response(
         {'message': 'Пользователь не обнаружен'},
         status=status.HTTP_400_BAD_REQUEST
@@ -151,6 +145,33 @@ class UserView(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsAdminPermission,)
     lookup_field = 'username'
+
+    @action(
+        detail=False,
+        methods=['get', 'patch'],
+        permission_classes=[IsAuthenticated]
+    )
+    def me(self, request, *args, **kwargs):
+        user = CustomUser.objects.get(username=self.request.user.username)
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data)
+        if request.method == 'PATCH':
+            partial = user
+            serializer = self.get_serializer(
+                user,
+                data=request.data,
+                partial=partial
+            )
+            serializer.is_valid(raise_exception=True)
+            if request.data.get('role') is not None and user.role == 'user':
+                if request.data.get('role') != 'user':
+                    return Response(serializer.data)
+            self.perform_update(serializer)
+
+            if getattr(user, '_prefetched_objects_cache', None):
+                user._prefetched_objects_cache = {}
+            return Response(serializer.data)
 
 
 class OwnerUserView(generics.RetrieveAPIView, generics.UpdateAPIView):
