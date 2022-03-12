@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
@@ -16,9 +16,9 @@ from api_yamdb.settings import ADMIN_EMAIL
 from .filters import TitleFilter
 from .mixins import CreateListDestroyMixin
 from .permissions import (AuthorAdminModeratorOrReadOnly, IsAdminOrReadOnly,
-                          IsAdminPermission, IsAuthorOnlyPermission)
+                          IsAdminPermission)
 from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, OwnerSerializer, RegisterSerializer,
+                          GenreSerializer, RegisterSerializer,
                           ReviewSerializer, TitleCreateSerializer,
                           TitleSerializer, TokenSerializer, UserSerializer)
 from reviews.models import Category, Genre, Review, Title  # isort:skip
@@ -167,15 +167,3 @@ class UserView(viewsets.ModelViewSet):
             if getattr(user, '_prefetched_objects_cache', None):
                 user._prefetched_objects_cache = {}
             return Response(serializer.data)
-
-
-class OwnerUserView(generics.RetrieveAPIView, generics.UpdateAPIView):
-    serializer_class = OwnerSerializer
-    queryset = CustomUser.objects.all()
-    permission_classes = (IsAuthorOnlyPermission,)
-
-    def get_object(self):
-        queryset = self.filter_queryset(self.get_queryset())
-        obj = queryset.get(pk=self.request.user.pk)
-        self.check_object_permissions(self.request, obj)
-        return obj

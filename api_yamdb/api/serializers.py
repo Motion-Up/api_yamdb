@@ -98,7 +98,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-
     queryset = CustomUser.objects.all()
     email = serializers.EmailField(
         required=True,
@@ -120,17 +119,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        fields = (
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
-        )
-        model = CustomUser
-        lookup_field = 'username'
-
-
-class OwnerSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(read_only=True)
 
     class Meta:
         fields = (
