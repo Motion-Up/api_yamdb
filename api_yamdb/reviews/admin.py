@@ -13,8 +13,8 @@ class TitleAdmin(admin.ModelAdmin):
     list_filter = ('name',)
     empty_value_display = '-пусто-'
 
-    def display_genres(self, obj):
-        all_genres = obj.genre.all()
+    def get_genres(self, obj_genre):
+        all_genres = obj_genre.genre.values_list('name', flat=True)
         return [genre for genre in all_genres]
 
 
