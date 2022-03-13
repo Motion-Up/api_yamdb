@@ -1,7 +1,9 @@
 import csv
 import pathlib
-import sqlite3
 from pathlib import Path
+import datetime
+
+import peewee
 
 from django.core.management.base import BaseCommand
 
@@ -16,7 +18,7 @@ all_csv_files = {
         "?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         'insert': "[(row['id'], row['username'], row['email'], 'qqq', "
         "False, row['username'], row['username'], False, False, "
-        "datetime.datetime.now(), 'Hello!', row['role'])]"
+        f"'{datetime.datetime.now()}', 'Hello!', row['role'])]"
     },
     'category.csv': {
         'command': "INSERT OR IGNORE INTO reviews_category (name, slug) "
@@ -57,7 +59,7 @@ class Command(BaseCommand):
     help = 'The Zen of Python'
 
     def handle(self, *args, **options):
-        connection = sqlite3.connect(path_db)
+        connection = peewee.SqliteDatabase(path_db)
         cursor = connection.cursor()
         for key, item in all_csv_files.items():
             insert_records = item['command']

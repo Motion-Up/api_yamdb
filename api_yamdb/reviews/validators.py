@@ -1,10 +1,10 @@
-import datetime
+from django.utils import timezone
 
 from django.core.exceptions import ValidationError
 
 
 def validate_year(value):
-    if value > datetime.datetime.now().year:
+    if value > timezone.now().year:
         raise ValidationError(
             f'{value} не правильно указан год'
         )

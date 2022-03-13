@@ -10,13 +10,11 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         exclude = ('id',)
-        lookup_field = 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         exclude = ('id',)
-        lookup_field = 'slug'
         model = Genre
 
 
@@ -98,13 +96,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    queryset = CustomUser.objects.all()
     email = serializers.EmailField(
         required=True,
-        validators=[UniqueValidator(queryset=queryset)]
+        validators=[UniqueValidator(queryset=CustomUser.objects.all())]
     )
     username = serializers.CharField(
-        validators=[UniqueValidator(queryset=queryset)],
+        validators=[UniqueValidator(queryset=CustomUser.objects.all())],
         required=True,
     )
 

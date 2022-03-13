@@ -12,7 +12,6 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from api_yamdb.settings import ADMIN_EMAIL
-
 from .filters import TitleFilter
 from .mixins import CreateListDestroyMixin
 from .permissions import (AuthorAdminModeratorOrReadOnly, IsAdminOrReadOnly,
@@ -46,14 +45,12 @@ class GenreViewSet(CreateListDestroyMixin):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all().annotate(
+        rating=Avg('reviews__score')).order_by('-id')
     pagination_class = PageNumberPagination
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
-
-    def get_queryset(self):
-        return Title.objects.all().annotate(
-            rating=Avg('reviews__score')).order_by('-id')
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
@@ -147,19 +144,18 @@ class UserView(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def me(self, request, *args, **kwargs):
-        user = CustomUser.objects.get(username=self.request.user.username)
+        user = request.user
         if request.method == 'GET':
             serializer = self.get_serializer(user)
             return Response(serializer.data)
         if request.method == 'PATCH':
-            partial = user
             serializer = self.get_serializer(
                 user,
                 data=request.data,
-                partial=partial
+                partial=user
             )
             serializer.is_valid(raise_exception=True)
-            if request.data.get('role') is not None and user.role == 'user':
+            if request.data.get('role') is not None and user.is_user:
                 if request.data.get('role') != 'user':
                     return Response(serializer.data)
             self.perform_update(serializer)
