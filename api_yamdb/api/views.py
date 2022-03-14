@@ -156,8 +156,7 @@ class UserView(viewsets.ModelViewSet):
             )
             serializer.is_valid(raise_exception=True)
             if request.data.get('role') is not None and user.is_user:
-                if request.data.get('role') != 'user':
-                    return Response(serializer.data)
+                return Response(serializer.data)
             self.perform_update(serializer)
 
             if getattr(user, '_prefetched_objects_cache', None):
